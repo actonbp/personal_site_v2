@@ -28,14 +28,14 @@ const OrbitControls = dynamic(
 )
 
 // Topic positions for the matrix rain transformation
-const topicPositions = {
+const topicPositions: { [key: string]: [number, number, number] } = {
   "Agents": [-8, 4, 0],
   "Embeddings": [8, -2, 2],
   "Leadership": [-4, -4, -2],
   "Teams": [4, 2, -4],
   "Memory": [-6, 0, 4],
   "Identity": [0, -2, -4],
-} as const
+}
 
 export default function Home() {
   const [focusedTopic, setFocusedTopic] = useState<string | null>(null)
