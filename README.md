@@ -1,6 +1,6 @@
 # Personal Website V2
 
-Interactive 3D visualization of research topics and papers, featuring a Matrix-style interface. Visit [actonbp.com](https://actonbp.com) to see it live.
+Interactive 3D visualization of research topics and papers, featuring a Matrix-style interface. Visit [bpacton.com](https://bpacton.com) to see it live.
 
 ## Features
 
@@ -32,4 +32,4 @@ npm run build
 
 ## Deployment
 
-This site is automatically deployed to [actonbp.com](https://actonbp.com) via Vercel when changes are pushed to the main branch.
+This site is automatically deployed to [bpacton.com](https://bpacton.com) via Vercel when changes are pushed to the main branch.

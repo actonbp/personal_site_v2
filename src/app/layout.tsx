@@ -5,8 +5,26 @@ import "./globals.css"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Academic Research Visualization",
-  description: "Interactive 3D visualization of research topics",
+  title: "BP Acton - Research & Projects",
+  description: "Interactive 3D visualization of research topics and projects",
+  metadataBase: new URL('https://bpacton.com'),
+  openGraph: {
+    title: "BP Acton - Research & Projects",
+    description: "Interactive 3D visualization of research topics and projects",
+    url: 'https://bpacton.com',
+    siteName: 'BP Acton',
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    title: "BP Acton - Research & Projects",
+    description: "Interactive 3D visualization of research topics and projects",
+    card: 'summary_large_image',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
 export default function RootLayout({
