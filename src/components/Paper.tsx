@@ -1,3 +1,5 @@
+"use client"
+
 import { useRef } from "react"
 import { useFrame } from "@react-three/fiber"
 import { Text, Float } from "@react-three/drei"
@@ -35,7 +37,7 @@ export default function Paper({ title, position, isVisible, topicPosition }: Pap
 
   return (
     <group>
-      <line ref={lineRef} geometry={lineGeometry} material={lineMaterial} />
+      <primitive object={new THREE.Line(lineGeometry, lineMaterial)} ref={lineRef} />
       <Float speed={1} rotationIntensity={0.2} floatIntensity={0.5}>
         <group 
           ref={paperRef}
