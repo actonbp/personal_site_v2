@@ -15,6 +15,10 @@ type Topic = {
   }>
 }
 
+type TopicWordsProps = {
+  onTopicFocus: (topic: string | null) => void
+}
+
 const topics: Topic[] = [
   { 
     name: "Agents",
@@ -72,7 +76,7 @@ const topics: Topic[] = [
   }
 ]
 
-export default function TopicWords() {
+export default function TopicWords({ onTopicFocus }: TopicWordsProps) {
   const [focusedTopic, setFocusedTopic] = useState<string | null>(null)
   const [hoveredTopic, setHoveredTopic] = useState<string | null>(null)
   const textRefs = useRef<{ [key: string]: THREE.Mesh }>({})
@@ -120,7 +124,9 @@ export default function TopicWords() {
                 scale={[scale, scale, scale]}
                 onClick={(event) => {
                   event.stopPropagation()
-                  setFocusedTopic(focusedTopic === topic.name ? null : topic.name)
+                  const newTopic = focusedTopic === topic.name ? null : topic.name
+                  setFocusedTopic(newTopic)
+                  onTopicFocus(newTopic)
                 }}
                 onPointerOver={(event) => {
                   event.stopPropagation()
