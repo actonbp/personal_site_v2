@@ -4,9 +4,10 @@ import { useRef, useEffect } from 'react'
 import { OrbitControls } from '@react-three/drei'
 import { useThree } from '@react-three/fiber'
 import * as THREE from 'three'
+import { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
 
 // Define an interface for OrbitControls
-interface OrbitControlsType {
+interface OrbitControlsProps {
   rotateSpeed?: number;
   zoomSpeed?: number;
   dampingFactor?: number;
@@ -47,7 +48,8 @@ export default function MobileOrbitControls({
   onEnd,
   onChange
 }: MobileOrbitControlsProps) {
-  const controlsRef = useRef<OrbitControlsType>(null)
+  // Use the correct type for the ref
+  const controlsRef = useRef<OrbitControlsImpl>(null)
   const { camera, gl } = useThree()
   
   useEffect(() => {
@@ -56,7 +58,7 @@ export default function MobileOrbitControls({
     
     if (isMobile && controlsRef.current) {
       // Adjust controls for mobile
-      const controls = controlsRef.current as OrbitControlsType
+      const controls = controlsRef.current
       
       // Make touch rotation more sensitive
       if (controls.rotateSpeed !== undefined) {
@@ -89,18 +91,14 @@ export default function MobileOrbitControls({
       maxDistance={maxDistance}
       minPolarAngle={minPolarAngle}
       maxPolarAngle={maxPolarAngle}
-      target={target}
+      target={new THREE.Vector3(...target)}
       onStart={onStart}
       onEnd={onEnd}
       onChange={onChange}
-      // Mobile-specific props
-      enableTouchRotate={true}
-      enableTouchZoom={true}
-      enableTouchPan={true}
-      touches={{
-        ONE: 1,
-        TWO: 3 // Make two-finger touch act as THREE
-      }}
+      // Mobile-optimized settings
+      enableRotate={true}
+      rotateSpeed={1.2}
+      zoomSpeed={1.5}
     />
   )
 } 

@@ -38,8 +38,8 @@ export default function MobileThreeSupport() {
       const optimizeScene = () => {
         scene.traverse((object) => {
           // Reduce shadow quality
-          if ((object as any).isLight && (object as any).shadow) {
-            const light = object as THREE.Light
+          if (object instanceof THREE.Light && 'shadow' in object) {
+            const light = object as THREE.Light & { shadow: THREE.LightShadow }
             if (light.shadow && light.shadow.map) {
               light.shadow.mapSize.width = 512
               light.shadow.mapSize.height = 512
@@ -48,28 +48,58 @@ export default function MobileThreeSupport() {
           }
           
           // Optimize materials
-          if ((object as any).isMesh) {
-            const mesh = object as THREE.Mesh
+          if (object instanceof THREE.Mesh) {
+            const mesh = object
             
             // Handle array of materials
             if (Array.isArray(mesh.material)) {
-              mesh.material.forEach(material => {
-                if ((material as any).map) {
-                  (material as any).map.minFilter = THREE.LinearFilter
-                  (material as any).map.generateMipmaps = false
+              mesh.material.forEach(mat => {
+                // Skip if not a standard material
+                if (!(mat instanceof THREE.MeshStandardMaterial || 
+                      mat instanceof THREE.MeshBasicMaterial || 
+                      mat instanceof THREE.MeshPhongMaterial)) {
+                  return
+                }
+                
+                // Safely access map property
+                const material = mat as THREE.Material & { map?: THREE.Texture }
+                if (material.map) {
+                  // Use direct property assignment
+                  material.map.generateMipmaps = false
+                  // Use numeric constant directly
+                  Object.defineProperty(material.map, 'minFilter', {
+                    value: 1006, // THREE.LinearFilter
+                    writable: true
+                  })
                 }
               })
             } 
             // Handle single material
-            else if (mesh.material && (mesh.material as any).map) {
-              (mesh.material as any).map.minFilter = THREE.LinearFilter
-              (mesh.material as any).map.generateMipmaps = false
+            else if (mesh.material) {
+              // Skip if not a standard material
+              if (!(mesh.material instanceof THREE.MeshStandardMaterial || 
+                    mesh.material instanceof THREE.MeshBasicMaterial || 
+                    mesh.material instanceof THREE.MeshPhongMaterial)) {
+                return
+              }
+              
+              // Safely access map property
+              const material = mesh.material as THREE.Material & { map?: THREE.Texture }
+              if (material.map) {
+                // Use direct property assignment
+                material.map.generateMipmaps = false
+                // Use numeric constant directly
+                Object.defineProperty(material.map, 'minFilter', {
+                  value: 1006, // THREE.LinearFilter
+                  writable: true
+                })
+              }
             }
           }
           
           // Reduce particle count
-          if ((object as any).isPoints && (object as any).geometry) {
-            const points = object as THREE.Points
+          if (object instanceof THREE.Points && object.geometry) {
+            const points = object
             const originalCount = points.geometry.attributes.position.count
             
             // Only reduce if there are many particles

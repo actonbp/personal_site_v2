@@ -10,7 +10,7 @@ export default function MobileViewport() {
     // If it doesn't exist, create it
     if (!viewportMeta) {
       viewportMeta = document.createElement('meta')
-      viewportMeta.name = 'viewport'
+      viewportMeta.setAttribute('name', 'viewport')
       document.head.appendChild(viewportMeta)
     }
     
@@ -22,8 +22,8 @@ export default function MobileViewport() {
     
     // Add additional meta tags for mobile
     const touchIconLink = document.createElement('link')
-    touchIconLink.rel = 'apple-touch-icon'
-    touchIconLink.href = '/apple-touch-icon.png' // You'll need to create this icon
+    touchIconLink.setAttribute('rel', 'apple-touch-icon')
+    touchIconLink.setAttribute('href', '/apple-touch-icon.png') // You'll need to create this icon
     document.head.appendChild(touchIconLink)
     
     // Add mobile-specific styles

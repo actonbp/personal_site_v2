@@ -21,30 +21,34 @@ export default function MobilePerformance() {
       
       // Reduce the number of lights that cast shadows
       scene.traverse((object) => {
-        if (object.isLight && object.shadow) {
-          object.shadow.mapSize.width = 512
-          object.shadow.mapSize.height = 512
-          object.castShadow = false // Disable shadows on mobile for performance
+        // Type check and cast to Light if it's a light
+        if (object instanceof THREE.Light && 'shadow' in object) {
+          const light = object as THREE.Light & { shadow: THREE.LightShadow }
+          light.shadow.mapSize.width = 512
+          light.shadow.mapSize.height = 512
+          light.castShadow = false // Disable shadows on mobile for performance
         }
       })
       
       // Optimize texture quality
       const lowerTextureQuality = () => {
         scene.traverse((object) => {
-          if (object.isMesh && object.material) {
+          if (object instanceof THREE.Mesh) {
+            const mesh = object as THREE.Mesh
+            
             // Handle array of materials
-            if (Array.isArray(object.material)) {
-              object.material.forEach(material => {
-                if (material.map) {
-                  material.map.minFilter = 1006 // THREE.LinearFilter
+            if (Array.isArray(mesh.material)) {
+              mesh.material.forEach(material => {
+                if (material instanceof THREE.MeshStandardMaterial && material.map) {
+                  material.map.minFilter = THREE.LinearFilter
                   material.map.generateMipmaps = false
                 }
               })
             } 
             // Handle single material
-            else if (object.material.map) {
-              object.material.map.minFilter = 1006 // THREE.LinearFilter
-              object.material.map.generateMipmaps = false
+            else if (mesh.material instanceof THREE.MeshStandardMaterial && mesh.material.map) {
+              mesh.material.map.minFilter = THREE.LinearFilter
+              mesh.material.map.generateMipmaps = false
             }
           }
         })
@@ -54,7 +58,7 @@ export default function MobilePerformance() {
       
       // Reduce particle count for mobile
       scene.traverse((object) => {
-        if (object.isPoints && object.geometry) {
+        if (object instanceof THREE.Points && object.geometry) {
           // If this is a particle system, reduce the number of particles
           const originalCount = object.geometry.attributes.position.count
           const newCount = Math.floor(originalCount * 0.5) // Reduce by 50%
