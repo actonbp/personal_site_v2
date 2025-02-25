@@ -1,14 +1,18 @@
 "use client"
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 
 // Dynamically import mobile components
 const MobileViewport = dynamic(() => import('./mobile/MobileViewport'), { ssr: false })
 const MobileOrbitControls = dynamic(() => import('./mobile/MobileOrbitControls'), { ssr: false })
 const MobileSupport = dynamic(() => import('./mobile/MobileSupport'), { ssr: false })
+const MobileTourButton = dynamic(() => import('./mobile/MobileTourButton'), { ssr: false })
+const MobileGuidedTour = dynamic(() => import('./mobile/MobileGuidedTour'), { ssr: false })
 
 export default function MobileLayout({ children }: { children: React.ReactNode }) {
+  const [isTourActive, setIsTourActive] = useState(false)
+  
   useEffect(() => {
     // Add a class to the body for mobile-specific CSS
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
@@ -18,8 +22,8 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
       
       // Create and add mobile-specific meta tags
       const viewportMeta = document.createElement('meta')
-      viewportMeta.name = 'viewport'
-      viewportMeta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'
+      viewportMeta.setAttribute('name', 'viewport')
+      viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no')
       document.head.appendChild(viewportMeta)
       
       // Add mobile-specific styles
@@ -56,11 +60,32 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
     }
   }, [])
   
+  // Handle tour activation
+  const handleStartTour = () => {
+    setIsTourActive(true)
+  }
+  
+  const handleTourComplete = () => {
+    setIsTourActive(false)
+  }
+  
+  const handleTourStop = () => {
+    setIsTourActive(false)
+  }
+  
   return (
     <>
       {children}
       <MobileViewport />
       <MobileSupport />
+      
+      {/* Tour components */}
+      {!isTourActive && <MobileTourButton onStartTour={handleStartTour} />}
+      <MobileGuidedTour 
+        isActive={isTourActive} 
+        onComplete={handleTourComplete} 
+        onStop={handleTourStop} 
+      />
     </>
   )
 } 

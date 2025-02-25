@@ -5,6 +5,8 @@ import { useFrame } from "@react-three/fiber"
 import { Points, PointMaterial, Text, Line } from "@react-three/drei"
 import * as THREE from "three"
 import { papers, topics } from "@/data/embeddingData"
+import GuidedTour from "./GuidedTour"
+import TourButton from "./TourButton"
 
 // Background particle settings
 const particleCount = 1000
@@ -15,6 +17,7 @@ export default function Scene() {
   const [selectedPaper, setSelectedPaper] = useState<string | null>(null)
   const [hoveredTopic, setHoveredTopic] = useState<string | null>(null)
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null)
+  const [isTourActive, setIsTourActive] = useState(false)
   
   // Refs for animations
   const pointsRef = useRef<THREE.Points>(null!)
@@ -104,6 +107,24 @@ export default function Scene() {
       papersGroupRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.2) * 0.05
     }
   })
+  
+  // Handle tour activation
+  const handleStartTour = () => {
+    // Clear any selected papers or topics
+    setSelectedPaper(null)
+    setSelectedTopic(null)
+    
+    // Activate the tour
+    setIsTourActive(true)
+  }
+  
+  const handleTourComplete = () => {
+    setIsTourActive(false)
+  }
+  
+  const handleTourStop = () => {
+    setIsTourActive(false)
+  }
   
   return (
     <group position={[0, 0, -10]}>
@@ -273,6 +294,16 @@ export default function Scene() {
           blending={THREE.AdditiveBlending}
         />
       ))}
+      
+      {/* Tour button - only show when tour is not active */}
+      {!isTourActive && <TourButton onStartTour={handleStartTour} />}
+      
+      {/* Guided tour component */}
+      <GuidedTour 
+        isActive={isTourActive} 
+        onComplete={handleTourComplete} 
+        onStop={handleTourStop} 
+      />
     </group>
   )
 }
