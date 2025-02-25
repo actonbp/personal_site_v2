@@ -4,9 +4,9 @@ import { useEffect } from 'react'
 import dynamic from 'next/dynamic'
 
 // Dynamically import mobile components
-const MobileViewport = dynamic(() => import('./MobileViewport'), { ssr: false })
-const MobileOrbitControls = dynamic(() => import('./MobileOrbitControls'), { ssr: false })
-const MobileSupport = dynamic(() => import('./MobileSupport'), { ssr: false })
+const MobileViewport = dynamic(() => import('./mobile/MobileViewport'), { ssr: false })
+const MobileOrbitControls = dynamic(() => import('./mobile/MobileOrbitControls'), { ssr: false })
+const MobileSupport = dynamic(() => import('./mobile/MobileSupport'), { ssr: false })
 
 export default function MobileLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
