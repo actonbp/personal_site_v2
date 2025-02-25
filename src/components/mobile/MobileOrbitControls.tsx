@@ -3,6 +3,16 @@
 import { useRef, useEffect } from 'react'
 import { OrbitControls } from '@react-three/drei'
 import { useThree } from '@react-three/fiber'
+import * as THREE from 'three'
+
+// Define an interface for OrbitControls
+interface OrbitControlsType {
+  rotateSpeed?: number;
+  zoomSpeed?: number;
+  dampingFactor?: number;
+  update?: () => void;
+  [key: string]: any;
+}
 
 interface MobileOrbitControlsProps {
   enableDamping?: boolean
@@ -37,7 +47,7 @@ export default function MobileOrbitControls({
   onEnd,
   onChange
 }: MobileOrbitControlsProps) {
-  const controlsRef = useRef(null)
+  const controlsRef = useRef<OrbitControlsType>(null)
   const { camera, gl } = useThree()
   
   useEffect(() => {
@@ -46,20 +56,20 @@ export default function MobileOrbitControls({
     
     if (isMobile && controlsRef.current) {
       // Adjust controls for mobile
-      const controls = controlsRef.current
+      const controls = controlsRef.current as OrbitControlsType
       
       // Make touch rotation more sensitive
-      if (controls.rotateSpeed) {
+      if (controls.rotateSpeed !== undefined) {
         controls.rotateSpeed = 1.2
       }
       
       // Make pinch zoom more responsive
-      if (controls.zoomSpeed) {
+      if (controls.zoomSpeed !== undefined) {
         controls.zoomSpeed = 1.5
       }
       
       // Reduce inertia slightly for more direct control
-      if (controls.dampingFactor) {
+      if (controls.dampingFactor !== undefined) {
         controls.dampingFactor = 0.15
       }
     }
