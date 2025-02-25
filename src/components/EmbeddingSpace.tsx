@@ -195,7 +195,7 @@ export default function EmbeddingSpace({
         <line key={i}>
           <bufferGeometry attach="geometry">
             <bufferAttribute
-              attachObject={['attributes', 'position']}
+              attach="attributes-position"
               array={new Float32Array([
                 connection.start.x, connection.start.y, connection.start.z,
                 connection.end.x, connection.end.y, connection.end.z
