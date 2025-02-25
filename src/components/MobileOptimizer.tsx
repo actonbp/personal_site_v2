@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useThree } from '@react-three/fiber'
+import * as THREE from 'three'
 
 /**
  * MobileOptimizer component enhances the experience on mobile devices
@@ -21,8 +22,11 @@ export default function MobileOptimizer() {
       // Adjust camera settings for mobile view
       if (camera) {
         // Increase the default field of view slightly for mobile
-        camera.fov = 75
-        camera.updateProjectionMatrix()
+        // Check if camera is a PerspectiveCamera before accessing fov
+        if (camera instanceof THREE.PerspectiveCamera) {
+          camera.fov = 75
+          camera.updateProjectionMatrix()
+        }
       }
       
       // Add touch-specific event listeners if needed
