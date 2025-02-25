@@ -95,7 +95,7 @@ export default function CameraController({ isInteracting }: CameraControllerProp
       }
       
       // Update controls target if available
-      if (controls) {
+      if (controls && typeof controls.update === 'function') {
         controls.update()
       }
     }
