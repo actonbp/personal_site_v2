@@ -1,70 +1,133 @@
 "use client"
 
 import dynamic from 'next/dynamic'
-import { Suspense, useState } from 'react'
+import { Suspense, useState, useRef, useEffect } from 'react'
+import { Canvas } from '@react-three/fiber'
+import { OrbitControls } from '@react-three/drei'
 
-const Scene = dynamic(() => import('@/components/Scene'), {
-  ssr: false
-})
-
-const TopicWords = dynamic(() => import('@/components/TopicWords'), {
-  ssr: false
-})
-
-const MatrixRain = dynamic(() => import('@/components/MatrixRain'), {
-  ssr: false
-})
-
-const Canvas = dynamic(
-  () => import('@react-three/fiber').then((mod) => mod.Canvas),
-  {
-    ssr: false
-  }
-)
-
-const OrbitControls = dynamic(
-  () => import('@react-three/drei').then((mod) => mod.OrbitControls),
-  { ssr: false }
-)
+// Dynamic imports for Next.js
+const TopicWords = dynamic(() => import('@/components/TopicWords'), { ssr: false })
+const MatrixRain = dynamic(() => import('@/components/MatrixRain'), { ssr: false })
+const InteractiveBackground = dynamic(() => import('@/components/InteractiveBackground'), { ssr: false })
+const CameraController = dynamic(() => import('@/components/CameraController'), { ssr: false })
 
 // Topic positions for the matrix rain transformation
-const topicPositions: { [key: string]: [number, number, number] } = {
-  "Agents": [-8, 4, 0],
-  "Embeddings": [8, -2, 2],
-  "Leadership": [-4, -4, -2],
-  "Teams": [4, 2, -4],
-  "Memory": [-6, 0, 4],
-  "Identity": [0, -2, -4],
+const topicPositions = {
+  "Agents": [5, 2, -3],
+  "Embeddings": [-4, 3, 2],
+  "Leadership": [0, 5, 4],
+  "Consciousness": [3, -2, 5],
+  "Cognition": [-5, 0, -3],
+  "Emergence": [2, 4, -2]
 }
 
 export default function Home() {
   const [focusedTopic, setFocusedTopic] = useState<string | null>(null)
+  const [isInteracting, setIsInteracting] = useState(false)
+  const controlsRef = useRef<any>(null)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Handle controls change
+  const handleControlsChange = () => {
+    setIsInteracting(true)
+    
+    // Clear existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+    }
+    
+    // Set a new timeout to reset interaction state
+    timeoutRef.current = setTimeout(() => {
+      setIsInteracting(false)
+    }, 2000)
+  }
+  
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [])
+
+  // Add global styles to ensure full black background
+  useEffect(() => {
+    // Add styles to html and body to ensure full black background
+    document.documentElement.style.backgroundColor = 'black'
+    document.documentElement.style.margin = '0'
+    document.documentElement.style.padding = '0'
+    document.documentElement.style.overflow = 'hidden'
+    document.documentElement.style.height = '100%'
+    
+    document.body.style.backgroundColor = 'black'
+    document.body.style.margin = '0'
+    document.body.style.padding = '0'
+    document.body.style.overflow = 'hidden'
+    document.body.style.height = '100%'
+    
+    return () => {
+      // Clean up styles when component unmounts
+      document.documentElement.style.removeProperty('background-color')
+      document.documentElement.style.removeProperty('margin')
+      document.documentElement.style.removeProperty('padding')
+      document.documentElement.style.removeProperty('overflow')
+      document.documentElement.style.removeProperty('height')
+      
+      document.body.style.removeProperty('background-color')
+      document.body.style.removeProperty('margin')
+      document.body.style.removeProperty('padding')
+      document.body.style.removeProperty('overflow')
+      document.body.style.removeProperty('height')
+    }
+  }, [])
 
   return (
-    <div className="fixed inset-0 w-full h-full bg-black overflow-hidden">
-      <Suspense fallback={
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-green-400 text-xl">Loading 3D visualization...</div>
-        </div>
-      }>
+    <main className="fixed inset-0 w-full h-full bg-black overflow-hidden">
+      <Suspense fallback={<div className="w-full h-full flex items-center justify-center text-white">Loading...</div>}>
         <Canvas
-          style={{ width: '100vw', height: '100vh' }}
-          camera={{
-            position: [0, 0, 20],
-            fov: 75,
-            near: 0.1,
-            far: 1000,
+          camera={{ position: [0, 0, 15], fov: 75 }}
+          gl={{ antialias: true }}
+          style={{ 
+            background: 'black',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh'
           }}
-          dpr={[1, 2]}
         >
-          <color attach="background" args={["#000000"]} />
           <ambientLight intensity={0.5} />
-          <OrbitControls enableZoom={false} enablePan={false} rotateSpeed={0.5} />
-          <Scene />
-          <MatrixRain focusedTopic={focusedTopic} topicPositions={topicPositions} />
-          <TopicWords onTopicFocus={setFocusedTopic} />
+          <pointLight position={[10, 10, 10]} intensity={1} />
+          
+          <InteractiveBackground />
+          <MatrixRain 
+            focusedTopic={focusedTopic} 
+            topicPositions={topicPositions} 
+          />
+          <TopicWords 
+            topics={Object.keys(topicPositions)} 
+            onFocus={setFocusedTopic} 
+            focusedTopic={focusedTopic}
+          />
+          
+          <OrbitControls
+            ref={controlsRef}
+            enableZoom={true}
+            enablePan={true}
+            enableRotate={true}
+            autoRotate={!isInteracting}
+            autoRotateSpeed={0.5}
+            minDistance={5}
+            maxDistance={50}
+            dampingFactor={0.1}
+            enableDamping={true}
+            onChange={handleControlsChange}
+          />
+          
+          <CameraController isInteracting={isInteracting} />
         </Canvas>
       </Suspense>
-    </div>
+    </main>
   )
 }

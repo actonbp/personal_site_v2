@@ -18,6 +18,20 @@ export default function MatrixRain({ focusedTopic, topicPositions }: MatrixRainP
   const textRefs = useRef<THREE.Mesh[]>([])
   const linesRef = useRef<THREE.LineSegments>(null!)
 
+  // Get a random color in the blue-purple spectrum
+  const getRandomColor = () => {
+    const hue = 0.6 + Math.random() * 0.2 // Blue to purple range (0.6-0.8)
+    const saturation = 0.5 + Math.random() * 0.5 // Medium to high saturation
+    const lightness = 0.5 + Math.random() * 0.3 // Medium to bright lightness
+    
+    return new THREE.Color().setHSL(hue, saturation, lightness)
+  }
+
+  // Convert a color to hex string format
+  const colorToHex = (color: THREE.Color) => {
+    return '#' + color.getHexString()
+  }
+
   const initialPositions = useMemo(() => {
     return Array.from({ length: numCharacters }, () => ({
       x: (Math.random() - 0.5) * 50,
@@ -27,7 +41,8 @@ export default function MatrixRain({ focusedTopic, topicPositions }: MatrixRainP
       char: characters[Math.floor(Math.random() * characters.length)],
       targetX: 0,
       targetY: 0,
-      targetZ: 0
+      targetZ: 0,
+      color: getRandomColor() // Assign a random color to each character
     }))
   }, [])
 
@@ -44,7 +59,15 @@ export default function MatrixRain({ focusedTopic, topicPositions }: MatrixRainP
             initialPositions[i].x, initialPositions[i].y, initialPositions[i].z,
             initialPositions[j].x, initialPositions[j].y, initialPositions[j].z
           )
-          colors.push(0, 1, 0, 0, 1, 0) // Green color
+          
+          // Use our beautiful color scheme for lines
+          const color1 = getRandomColor()
+          const color2 = getRandomColor()
+          
+          colors.push(
+            color1.r, color1.g, color1.b,
+            color2.r, color2.g, color2.b
+          )
         }
       }
     }
@@ -78,6 +101,17 @@ export default function MatrixRain({ focusedTopic, topicPositions }: MatrixRainP
             mesh.position.y = 25
             mesh.position.x = (Math.random() - 0.5) * 50
             mesh.position.z = (Math.random() - 0.5) * 50
+            
+            // Assign a new color when recycling
+            initialPositions[i].color = getRandomColor()
+            
+            // Update the text color
+            if (mesh.children[0]) {
+              const textGeometry = mesh.children[0] as THREE.Mesh
+              if (textGeometry.material instanceof THREE.Material) {
+                (textGeometry.material as any).color = initialPositions[i].color
+              }
+            }
           }
         }
 
@@ -101,7 +135,7 @@ export default function MatrixRain({ focusedTopic, topicPositions }: MatrixRainP
   return (
     <group ref={group}>
       <lineSegments ref={linesRef} geometry={lineGeometry}>
-        <lineBasicMaterial vertexColors transparent opacity={focusedTopic ? 0.3 : 0} />
+        <lineBasicMaterial vertexColors transparent opacity={focusedTopic ? 0.3 : 0} blending={THREE.AdditiveBlending} />
       </lineSegments>
       {initialPositions.map((pos, i) => (
         <Float key={i} speed={1} rotationIntensity={0} floatIntensity={0}>
@@ -111,11 +145,12 @@ export default function MatrixRain({ focusedTopic, topicPositions }: MatrixRainP
             }}
             position={[pos.x, pos.y, pos.z]}
             fontSize={0.8}
-            color="#00ff00"
+            color={colorToHex(pos.color)}
             anchorX="center"
             anchorY="middle"
             material-transparent={true}
             material-opacity={Math.random() * 0.5 + 0.2}
+            material-blending={THREE.AdditiveBlending}
           >
             {pos.char}
           </Text>
