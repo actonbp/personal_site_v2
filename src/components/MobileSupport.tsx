@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 
 // Dynamically import components that require client-side rendering
-const MobileViewport = dynamic(() => import('./MobileViewport'), { ssr: false })
-const MobileOptimizer = dynamic(() => import('./MobileOptimizer'), { ssr: false })
-const MobilePerformance = dynamic(() => import('./MobilePerformance'), { ssr: false })
+const MobileViewport = dynamic(() => import('./mobile/MobileViewport'), { ssr: false })
+const MobileOptimizer = dynamic(() => import('./mobile/MobileOptimizer'), { ssr: false })
+const MobilePerformance = dynamic(() => import('./mobile/MobilePerformance'), { ssr: false })
 
 export default function MobileSupport() {
   const [isMobile, setIsMobile] = useState(false)
