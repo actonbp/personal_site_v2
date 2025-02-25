@@ -1,110 +1,95 @@
 "use client"
 
-import { useRef, useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useThree, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
+// Define an interface for the controls with the update method
+interface OrbitControlsType {
+  update: () => void;
+  target: THREE.Vector3;
+  [key: string]: any;
+}
+
 interface CameraControllerProps {
-  isInteracting: boolean
+  isInteracting: boolean;
 }
 
 export default function CameraController({ isInteracting }: CameraControllerProps) {
   const { camera, controls } = useThree()
-  const targetRotation = useRef(new THREE.Euler())
-  const initialRotation = useRef(new THREE.Euler())
-  const initialPosition = useRef(new THREE.Vector3())
-  const targetPosition = useRef(new THREE.Vector3(0, 0, 20)) // Default camera position
-  const recenteringActive = useRef(false)
-  const recenteringProgress = useRef(0)
-  
-  // Store initial camera state when interaction stops
+  const initialRotationRef = useRef<THREE.Euler | null>(null)
+  const initialPositionRef = useRef<THREE.Vector3 | null>(null)
+  const targetRotationRef = useRef<THREE.Euler | null>(null)
+  const targetPositionRef = useRef<THREE.Vector3 | null>(null)
+  const animatingRef = useRef(false)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Store initial camera rotation when interaction stops
   useEffect(() => {
     if (isInteracting) {
-      recenteringActive.current = false
-      recenteringProgress.current = 0
+      // User is interacting, clear any pending recentering
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+        timeoutRef.current = null
+      }
+      animatingRef.current = false
     } else {
-      // When interaction stops, store current state and activate recentering
-      initialRotation.current.copy(camera.rotation)
-      initialPosition.current.copy(camera.position)
+      // User stopped interacting, store current rotation and set up recentering
+      initialRotationRef.current = camera.rotation.clone()
+      initialPositionRef.current = camera.position.clone()
       
       // Calculate target rotation (looking at center)
-      const lookAtMatrix = new THREE.Matrix4()
-      lookAtMatrix.lookAt(
-        camera.position,
-        new THREE.Vector3(0, 0, 0),
-        new THREE.Vector3(0, 1, 0)
-      )
-      targetRotation.current.setFromRotationMatrix(lookAtMatrix)
+      const targetRotation = new THREE.Euler()
+      const targetPosition = new THREE.Vector3(0, 0, 15) // Default centered position
       
-      // Keep the same distance from center but adjust position to be more centered
-      const distance = camera.position.length()
-      targetPosition.current.set(0, 0, distance)
+      // Store target values
+      targetRotationRef.current = targetRotation
+      targetPositionRef.current = targetPosition
       
-      recenteringActive.current = true
-      recenteringProgress.current = 0
+      // Start animation after a delay
+      timeoutRef.current = setTimeout(() => {
+        animatingRef.current = true
+      }, 2000)
+    }
+    
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
     }
   }, [isInteracting, camera])
   
-  // Smoothly recenter the camera
-  useFrame((state, delta) => {
-    if (recenteringActive.current && !isInteracting) {
-      // Gradually increase progress
-      recenteringProgress.current += delta * 0.2 // Slower for more gentle recentering
+  // Easing function for smooth animation
+  const easeOutCubic = (t: number): number => {
+    return 1 - Math.pow(1 - t, 3)
+  }
+  
+  // Animate camera back to center when not interacting
+  useFrame(() => {
+    if (animatingRef.current && 
+        initialRotationRef.current && 
+        targetRotationRef.current &&
+        initialPositionRef.current &&
+        targetPositionRef.current) {
       
-      // Clamp progress to 0-1
-      recenteringProgress.current = Math.min(recenteringProgress.current, 1)
+      // Interpolate rotation
+      const step = 0.02 // Adjust for faster/slower animation
+      const easedStep = easeOutCubic(step)
       
-      // Apply smooth easing
-      const t = easeOutCubic(recenteringProgress.current)
+      // Interpolate position
+      camera.position.lerp(targetPositionRef.current, easedStep)
       
-      // Interpolate between initial and target rotation
-      camera.rotation.x = THREE.MathUtils.lerp(
-        initialRotation.current.x,
-        targetRotation.current.x,
-        t
-      )
+      // Look at center
+      camera.lookAt(new THREE.Vector3(0, 0, 0))
       
-      camera.rotation.y = THREE.MathUtils.lerp(
-        initialRotation.current.y,
-        targetRotation.current.y,
-        t
-      )
-      
-      camera.rotation.z = THREE.MathUtils.lerp(
-        initialRotation.current.z,
-        targetRotation.current.z,
-        t
-      )
-      
-      // Interpolate position (optional, for more dramatic recentering)
-      camera.position.x = THREE.MathUtils.lerp(
-        initialPosition.current.x,
-        targetPosition.current.x,
-        t * 0.5 // Slower position adjustment
-      )
-      
-      camera.position.y = THREE.MathUtils.lerp(
-        initialPosition.current.y,
-        targetPosition.current.y,
-        t * 0.5 // Slower position adjustment
-      )
-      
-      // Stop recentering when complete
-      if (recenteringProgress.current >= 1) {
-        recenteringActive.current = false
-      }
-      
-      // Update controls target if available
-      if (controls && typeof controls.update === 'function') {
-        controls.update()
+      // If we have orbit controls, update them
+      if (controls) {
+        // Use type assertion to tell TypeScript that controls has an update method
+        const orbitControls = controls as unknown as OrbitControlsType;
+        orbitControls.update();
       }
     }
   })
   
   return null
-}
-
-// Easing function for smooth animation
-const easeOutCubic = (x: number): number => {
-  return 1 - Math.pow(1 - x, 3)
 } 
