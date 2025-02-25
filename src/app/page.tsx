@@ -12,13 +12,13 @@ const InteractiveBackground = dynamic(() => import('@/components/InteractiveBack
 const CameraController = dynamic(() => import('@/components/CameraController'), { ssr: false })
 
 // Topic positions for the matrix rain transformation
-const topicPositions = {
-  "Agents": [5, 2, -3],
-  "Embeddings": [-4, 3, 2],
-  "Leadership": [0, 5, 4],
-  "Consciousness": [3, -2, 5],
-  "Cognition": [-5, 0, -3],
-  "Emergence": [2, 4, -2]
+const topicPositions: { [key: string]: [number, number, number] } = {
+  "Agents": [10, 0, -5],
+  "Embeddings": [-8, 5, 0],
+  "Leadership": [0, -5, 10],
+  "Consciousness": [5, 10, 0],
+  "Cognition": [-10, 0, 5],
+  "Emergence": [0, 8, -10]
 }
 
 export default function Home() {
