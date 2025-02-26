@@ -4,7 +4,7 @@ import { useRef, useMemo, useEffect } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { useTexture } from '@react-three/drei'
 import * as THREE from 'three'
-import SimplexNoise from 'simplex-noise'
+import { createNoise2D } from 'simplex-noise'
 
 // Enhanced particle properties
 interface Particle {
@@ -38,7 +38,7 @@ export default function InteractiveBackground() {
   const noiseTime = useRef(0)
   
   // Generate noise for flow field
-  const simplex = useMemo(() => new SimplexNoise(), [])
+  const noise2D = useMemo(() => createNoise2D(), [])
   
   // Load particle texture
   const particleTexture = useTexture('/particle.png')
@@ -320,22 +320,19 @@ export default function InteractiveBackground() {
       particle.acceleration.set(0, 0, 0)
       
       // Get flow field direction from simplex noise
-      const noiseX = simplex.noise3D(
+      const noiseX = noise2D(
         particle.position.x * noiseScale + particle.noiseOffset.x,
-        particle.position.y * noiseScale + particle.noiseOffset.y,
-        noiseTime.current
+        particle.position.y * noiseScale + particle.noiseOffset.y
       )
       
-      const noiseY = simplex.noise3D(
+      const noiseY = noise2D(
         particle.position.x * noiseScale + particle.noiseOffset.x + 100,
-        particle.position.y * noiseScale + particle.noiseOffset.y + 100,
-        noiseTime.current
+        particle.position.y * noiseScale + particle.noiseOffset.y + 100
       )
       
-      const noiseZ = simplex.noise3D(
+      const noiseZ = noise2D(
         particle.position.x * noiseScale + particle.noiseOffset.x + 200,
-        particle.position.y * noiseScale + particle.noiseOffset.y + 200,
-        noiseTime.current
+        particle.position.y * noiseScale + particle.noiseOffset.y + 200
       )
       
       // Apply flow field force

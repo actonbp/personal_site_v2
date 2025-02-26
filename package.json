@@ -15,6 +15,7 @@
   "dependencies": {
     "@react-three/drei": "9.88.7",
     "@react-three/fiber": "8.15.11",
+    "@react-three/postprocessing": "^3.0.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "gsap": "^3.12.7",
@@ -25,7 +26,8 @@
     "simplex-noise": "^4.0.3",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",
-    "three": "0.159.0"
+    "three": "0.159.0",
+    "three-stdlib": "^2.35.14"
   },
   "devDependencies": {
     "@types/node": "^20.17.19",

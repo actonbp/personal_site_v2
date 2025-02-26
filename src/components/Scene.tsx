@@ -368,7 +368,14 @@ export default function Scene() {
         })
         
         // Enhanced glow effect
-        const materials = meshes.children.map(child => child.material)
+        const materials = meshes.children.map(child => {
+          // Check if child is a Mesh with a material property
+          if ('material' in child) {
+            return (child as THREE.Mesh).material;
+          }
+          return null;
+        }).filter(material => material !== null);
+        
         materials.forEach(material => {
           if (material) {
             timelineRef.current?.to(material, {
@@ -399,7 +406,14 @@ export default function Scene() {
         })
         
         // Enhanced glow effect
-        const materials = meshes.children.map(child => child.material)
+        const materials = meshes.children.map(child => {
+          // Check if child is a Mesh with a material property
+          if ('material' in child) {
+            return (child as THREE.Mesh).material;
+          }
+          return null;
+        }).filter(material => material !== null);
+        
         materials.forEach(material => {
           if (material) {
             timelineRef.current?.to(material, {
@@ -570,7 +584,8 @@ export default function Scene() {
     // Update connection line materials
     if (connectionsRef.current) {
       connectionsRef.current.children.forEach(child => {
-        if (child.material && 'uniforms' in child.material) {
+        // Check if child has a material property
+        if ('material' in child && child.material && 'uniforms' in (child.material as THREE.ShaderMaterial)) {
           (child.material as THREE.ShaderMaterial).uniforms.time.value = state.clock.elapsedTime
         }
       })
