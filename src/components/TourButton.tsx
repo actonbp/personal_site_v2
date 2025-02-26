@@ -11,7 +11,7 @@ export default function TourButton({ onStartTour }: TourButtonProps) {
   const [isHovered, setIsHovered] = useState(false)
   
   return (
-    <Html position={[10, 10, 0]} transform>
+    <Html position={[0, 0, 0]} center>
       <button
         onClick={onStartTour}
         onMouseEnter={() => setIsHovered(true)}
@@ -24,6 +24,7 @@ export default function TourButton({ onStartTour }: TourButtonProps) {
           flex items-center space-x-2
           shadow-lg hover:shadow-xl
           transform ${isHovered ? 'scale-105' : 'scale-100'}
+          fixed top-4 right-4 z-50
         `}
       >
         <svg 

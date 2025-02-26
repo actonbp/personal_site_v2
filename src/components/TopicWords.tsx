@@ -137,6 +137,7 @@ export default function TopicWords({ topics, onFocus, focusedTopic }: TopicWords
                   document.body.style.cursor = "default"
                   setHoveredTopic(null)
                 }}
+                userData={{ type: 'topic', name: topic.name }}
               >
                 {topic.name}
               </Text>

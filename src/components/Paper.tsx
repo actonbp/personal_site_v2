@@ -99,7 +99,7 @@ export default function Paper({ title, position, isVisible, topicPosition, onPap
   }
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} userData={{ type: 'paper', title: title }}>
       <primitive object={new THREE.Line(lineGeometry, lineMaterial)} ref={lineRef} />
       <points ref={particlesRef} geometry={particleGeometry} material={particleMaterial} />
       <PaperGraphic

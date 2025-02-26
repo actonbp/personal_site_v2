@@ -8,16 +8,16 @@ const MobileViewport = dynamic(() => import('./mobile/MobileViewport'), { ssr: f
 const MobileOrbitControls = dynamic(() => import('./mobile/MobileOrbitControls'), { ssr: false })
 const MobileSupport = dynamic(() => import('./mobile/MobileSupport'), { ssr: false })
 const MobileTourButton = dynamic(() => import('./mobile/MobileTourButton'), { ssr: false })
-const MobileGuidedTour = dynamic(() => import('./mobile/MobileGuidedTour'), { ssr: false })
 
 export default function MobileLayout({ children }: { children: React.ReactNode }) {
-  const [isTourActive, setIsTourActive] = useState(false)
+  const [isMobileDevice, setIsMobileDevice] = useState(false)
   
   useEffect(() => {
     // Add a class to the body for mobile-specific CSS
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
     
     if (isMobile) {
+      setIsMobileDevice(true)
       document.body.classList.add('mobile-device')
       
       // Create and add mobile-specific meta tags
@@ -29,29 +29,26 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
       // Add mobile-specific styles
       const mobileStyles = document.createElement('style')
       mobileStyles.textContent = `
-        body.mobile-device {
+        body {
           touch-action: none;
-          overflow: hidden;
-          position: fixed;
-          width: 100%;
-          height: 100%;
-          -webkit-overflow-scrolling: touch;
+          overscroll-behavior: none;
+          -webkit-overflow-scrolling: auto;
         }
         
-        /* Prevent text selection on mobile */
-        body.mobile-device * {
-          -webkit-tap-highlight-color: transparent;
-          -webkit-touch-callout: none;
-          user-select: none;
-        }
-        
-        /* Optimize canvas for mobile */
-        body.mobile-device canvas {
+        canvas {
           touch-action: none;
         }
       `
       document.head.appendChild(mobileStyles)
       
+      // Prevent default touch behaviors
+      document.addEventListener('touchmove', (e) => {
+        if (e.touches.length > 1) {
+          e.preventDefault()
+        }
+      }, { passive: false })
+      
+      // Clean up on unmount
       return () => {
         document.body.classList.remove('mobile-device')
         document.head.removeChild(viewportMeta)
@@ -60,32 +57,24 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
     }
   }, [])
   
-  // Handle tour activation
-  const handleStartTour = () => {
-    setIsTourActive(true)
-  }
-  
-  const handleTourComplete = () => {
-    setIsTourActive(false)
-  }
-  
-  const handleTourStop = () => {
-    setIsTourActive(false)
-  }
-  
   return (
     <>
       {children}
-      <MobileViewport />
-      <MobileSupport />
       
-      {/* Tour components */}
-      {!isTourActive && <MobileTourButton onStartTour={handleStartTour} />}
-      <MobileGuidedTour 
-        isActive={isTourActive} 
-        onComplete={handleTourComplete} 
-        onStop={handleTourStop} 
-      />
+      {/* Mobile-specific UI components */}
+      {isMobileDevice && (
+        <>
+          <MobileViewport />
+          <MobileOrbitControls />
+          <MobileSupport />
+          <MobileTourButton 
+            onStartTour={() => {
+              // Tour functionality removed - to be implemented in future
+              console.log('Tour functionality coming soon');
+            }} 
+          />
+        </>
+      )}
     </>
   )
 } 

@@ -99,6 +99,7 @@ export default function PaperGraphic({ title, position, isVisible, onClick }: Pa
         document.body.style.cursor = 'default'
         setHovered(false)
       }}
+      userData={{ type: 'paperGraphic', title: title }}
     >
       {/* Glow effect */}
       <mesh ref={glowRef} position={[0, 0, -0.1]}>

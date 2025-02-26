@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect } from "react"
 import { useThree, useFrame } from "@react-three/fiber"
-import { Text } from "@react-three/drei"
+import { Text, Html } from "@react-three/drei"
 import * as THREE from "three"
 import { gsap } from "gsap"
 import { topics, papers } from "@/data/embeddingData"
@@ -22,86 +22,136 @@ interface TourStop {
     highlight: boolean
   }[]
   narration?: string
+  onReachStop?: () => void
 }
 
 interface GuidedTourProps {
   isActive: boolean
   onComplete: () => void
   onStop: () => void
+  setActiveTopic?: (topic: string | null) => void
 }
 
-export default function GuidedTour({ isActive, onComplete, onStop }: GuidedTourProps) {
+export default function GuidedTour({ isActive, onComplete, onStop, setActiveTopic }: GuidedTourProps) {
   const { camera, scene } = useThree()
   const [currentStopIndex, setCurrentStopIndex] = useState(-1)
   const [isPlaying, setIsPlaying] = useState(false)
   const [showNarration, setShowNarration] = useState(false)
   const [narrationText, setNarrationText] = useState("")
+  const [activeTopic, setActiveTopicInternal] = useState<string | null>(null)
+  const [activePaper, setActivePaper] = useState<string | null>(null)
   const tourRef = useRef<THREE.Group>(null!)
   const originalCameraPosition = useRef(new THREE.Vector3())
   const originalCameraRotation = useRef(new THREE.Euler())
   const timeline = useRef<gsap.core.Timeline | null>(null)
   
-  // Define the tour stops
-  const tourStops = useRef<TourStop[]>([
-    {
-      title: "Welcome to My Research",
-      description: "Let's explore the key areas of my work",
-      target: {
-        position: new THREE.Vector3(0, 0, 20),
-        lookAt: new THREE.Vector3(0, 0, 0)
-      },
-      duration: 5,
-      entities: [],
-      narration: "Welcome to an interactive journey through my research. I'll guide you through the main topics and key papers that define my work."
-    },
-    {
-      title: "Agents",
-      description: "Exploring multi-agent systems and emergent behavior",
-      target: {
-        position: new THREE.Vector3(-6, 3, 5),
-        lookAt: new THREE.Vector3(-8, 4, 0)
-      },
-      duration: 8,
-      entities: [
-        { type: "topic", id: "t1", highlight: true },
-        { type: "paper", id: "p1", highlight: true },
-        { type: "paper", id: "p3", highlight: false },
-        { type: "paper", id: "p7", highlight: false }
-      ],
-      narration: "My work on agents focuses on how individual entities interact to create complex systems. This research explores emergent behaviors and collective intelligence."
-    },
-    {
-      title: "Embeddings",
-      description: "Vector representations and semantic spaces",
-      target: {
-        position: new THREE.Vector3(6, -1, 7),
-        lookAt: new THREE.Vector3(8, -2, 2)
-      },
-      duration: 8,
-      entities: [
-        { type: "topic", id: "t2", highlight: true },
-        { type: "paper", id: "p2", highlight: true },
-        { type: "paper", id: "p5", highlight: false },
-        { type: "paper", id: "p8", highlight: false }
-      ],
-      narration: "Embeddings are mathematical representations that capture semantic relationships. My research explores how these vector spaces can reveal hidden patterns in complex data."
-    },
-    {
-      title: "Leadership",
-      description: "Team dynamics and organizational behavior",
-      target: {
-        position: new THREE.Vector3(-3, -3, 3),
-        lookAt: new THREE.Vector3(-4, -4, -2)
-      },
-      duration: 8,
-      entities: [
-        { type: "topic", id: "t3", highlight: true },
-        { type: "paper", id: "p4", highlight: true },
-        { type: "paper", id: "p6", highlight: false }
-      ],
-      narration: "My leadership research investigates how teams function and how leadership emerges in complex systems. This work bridges organizational psychology and complexity science."
-    },
-    {
+  // Update the parent component's state when our internal state changes
+  useEffect(() => {
+    if (setActiveTopic) {
+      setActiveTopic(activeTopic);
+    }
+  }, [activeTopic, setActiveTopic]);
+  
+  // Helper function to set the active topic both internally and externally
+  const updateActiveTopic = (topic: string | null) => {
+    setActiveTopicInternal(topic);
+    // The parent will be updated via the useEffect above
+  }
+  
+  // Find topic elements in the scene
+  const findTopicElement = (topicName: string) => {
+    let topicElement = null;
+    scene.traverse((object) => {
+      if (object.userData && object.userData.type === 'topic' && object.userData.name === topicName) {
+        topicElement = object;
+      }
+    });
+    return topicElement;
+  }
+  
+  // Find paper elements in the scene
+  const findPaperElement = (paperTitle: string) => {
+    let paperElement = null;
+    scene.traverse((object) => {
+      if (object.userData && object.userData.type === 'paper' && object.userData.title === paperTitle) {
+        paperElement = object;
+      }
+    });
+    return paperElement;
+  }
+  
+  // Generate tour stops dynamically based on topics and papers
+  const generateTourStops = () => {
+    const stops: TourStop[] = [
+      {
+        title: "Welcome to My Research",
+        description: "Let's explore the key areas of my work",
+        target: {
+          position: new THREE.Vector3(0, 0, 20),
+          lookAt: new THREE.Vector3(0, 0, 0)
+        },
+        duration: 5,
+        entities: [],
+        narration: "Welcome to an interactive journey through my research. I'll guide you through the main topics and key papers that define my work.",
+        onReachStop: () => {
+          // Reset any active topics when starting the tour
+          updateActiveTopic(null);
+          setActivePaper(null);
+        }
+      }
+    ];
+    
+    // Add stops for each topic
+    topics.forEach(topic => {
+      // Add a stop for the topic itself
+      stops.push({
+        title: topic.name,
+        description: `Exploring ${topic.name}`,
+        target: {
+          position: new THREE.Vector3(...topic.embedding).add(new THREE.Vector3(5, 0, 5)),
+          lookAt: new THREE.Vector3(...topic.embedding)
+        },
+        duration: 8,
+        entities: [
+          { type: "topic", id: topic.id, highlight: true }
+        ],
+        narration: `My work on ${topic.name.toLowerCase()} focuses on understanding complex systems and their interactions.`,
+        onReachStop: () => {
+          // Activate this topic when we reach this stop
+          updateActiveTopic(topic.name);
+          setActivePaper(null);
+        }
+      });
+      
+      // Find papers related to this topic
+      const relatedPapers = papers.filter(paper => paper.topics.includes(topic.id));
+      
+      // Add stops for each related paper
+      relatedPapers.forEach(paper => {
+        stops.push({
+          title: paper.title,
+          description: "Exploring this research paper",
+          target: {
+            position: new THREE.Vector3(...paper.embedding).add(new THREE.Vector3(3, 0, 3)),
+            lookAt: new THREE.Vector3(...paper.embedding)
+          },
+          duration: 6,
+          entities: [
+            { type: "topic", id: topic.id, highlight: true },
+            { type: "paper", id: paper.id, highlight: true }
+          ],
+          narration: paper.abstract,
+          onReachStop: () => {
+            // Keep the topic active and also activate this paper
+            updateActiveTopic(topic.name);
+            setActivePaper(paper.title);
+          }
+        });
+      });
+    });
+    
+    // Add a final connecting-the-dots stop
+    stops.push({
       title: "Connecting the Dots",
       description: "How these research areas interconnect",
       target: {
@@ -109,18 +159,20 @@ export default function GuidedTour({ isActive, onComplete, onStop }: GuidedTourP
         lookAt: new THREE.Vector3(0, 0, 0)
       },
       duration: 10,
-      entities: [
-        { type: "topic", id: "t1", highlight: true },
-        { type: "topic", id: "t2", highlight: true },
-        { type: "topic", id: "t3", highlight: true },
-        { type: "topic", id: "t4", highlight: true },
-        { type: "paper", id: "p1", highlight: true },
-        { type: "paper", id: "p2", highlight: true },
-        { type: "paper", id: "p4", highlight: true }
-      ],
-      narration: "The most exciting aspects of my research emerge at the intersections of these fields. By connecting agents, embeddings, and leadership theories, we can develop new approaches to understanding complex systems."
-    }
-  ]).current
+      entities: [],
+      narration: "The most exciting aspects of my research emerge at the intersections of these fields. By connecting these diverse topics, we can develop new approaches to understanding complex systems.",
+      onReachStop: () => {
+        // Reset active elements for the final overview
+        updateActiveTopic(null);
+        setActivePaper(null);
+      }
+    });
+    
+    return stops;
+  };
+  
+  // Create tour stops dynamically
+  const tourStops = useRef<TourStop[]>(generateTourStops()).current;
   
   // Initialize tour when activated
   useEffect(() => {
@@ -174,6 +226,14 @@ export default function GuidedTour({ isActive, onComplete, onStop }: GuidedTourP
     setNarrationText(currentStop.narration || "")
     setShowNarration(true)
     
+    // Call the onReachStop callback if it exists
+    if (currentStop.onReachStop) {
+      currentStop.onReachStop();
+    }
+    
+    // Add a small delay to allow the topic/paper activation to take effect
+    timeline.current.to({}, { duration: 0.5 });
+    
     // Animate camera to target position
     timeline.current.to(camera.position, {
       x: currentStop.target.position.x,
@@ -199,77 +259,13 @@ export default function GuidedTour({ isActive, onComplete, onStop }: GuidedTourP
       }, "<")
     }
     
-    // Highlight relevant entities
-    highlightEntities(currentStop.entities)
-    
     // Add a pause at the end of each stop
     timeline.current.to({}, { duration: currentStop.duration - 2 })
   }
   
-  // Highlight the specified entities
-  const highlightEntities = (entities: TourStop["entities"]) => {
-    // Reset all highlights first
-    scene.traverse((object) => {
-      if (object.userData.type === "topic" || object.userData.type === "paper") {
-        // Reset to normal appearance
-        if (object.material) {
-          gsap.to(object.material, {
-            opacity: 0.7,
-            emissive: new THREE.Color(0x000000),
-            duration: 1
-          })
-        }
-        
-        // Reset scale
-        gsap.to(object.scale, {
-          x: 1,
-          y: 1,
-          z: 1,
-          duration: 1
-        })
-      }
-    })
-    
-    // Apply highlights to specified entities
-    entities.forEach(entity => {
-      const objectId = entity.id
-      
-      scene.traverse((object) => {
-        if (object.userData.id === objectId) {
-          if (entity.highlight) {
-            // Highlight with glow and scale
-            if (object.material) {
-              gsap.to(object.material, {
-                opacity: 1,
-                emissive: new THREE.Color(0x333333),
-                duration: 1
-              })
-            }
-            
-            // Scale up slightly
-            gsap.to(object.scale, {
-              x: 1.2,
-              y: 1.2,
-              z: 1.2,
-              duration: 1
-            })
-          } else {
-            // Semi-highlight (just make visible)
-            if (object.material) {
-              gsap.to(object.material, {
-                opacity: 0.9,
-                duration: 1
-              })
-            }
-          }
-        }
-      })
-    })
-  }
-  
   // Reset the tour
   const resetTour = () => {
-    // Kill any active animations
+    // Kill any existing animations
     if (timeline.current) {
       timeline.current.kill()
     }
@@ -279,7 +275,7 @@ export default function GuidedTour({ isActive, onComplete, onStop }: GuidedTourP
       x: originalCameraPosition.current.x,
       y: originalCameraPosition.current.y,
       z: originalCameraPosition.current.z,
-      duration: 2,
+      duration: 1,
       ease: "power2.inOut"
     })
     
@@ -288,38 +284,17 @@ export default function GuidedTour({ isActive, onComplete, onStop }: GuidedTourP
       x: originalCameraRotation.current.x,
       y: originalCameraRotation.current.y,
       z: originalCameraRotation.current.z,
-      duration: 2,
+      duration: 1,
       ease: "power2.inOut"
     })
-    
-    // Reset all highlights
-    scene.traverse((object) => {
-      if (object.userData.type === "topic" || object.userData.type === "paper") {
-        // Reset to normal appearance
-        if (object.material) {
-          gsap.to(object.material, {
-            opacity: 0.7,
-            emissive: new THREE.Color(0x000000),
-            duration: 1
-          })
-        }
-        
-        // Reset scale
-        gsap.to(object.scale, {
-          x: 1,
-          y: 1,
-          z: 1,
-          duration: 1
-        })
-      }
-    })
-    
-    // Hide narration
-    setShowNarration(false)
     
     // Reset state
     setCurrentStopIndex(-1)
     setIsPlaying(false)
+    setShowNarration(false)
+    setNarrationText("")
+    updateActiveTopic(null)
+    setActivePaper(null)
   }
   
   // Finish the tour
@@ -328,7 +303,7 @@ export default function GuidedTour({ isActive, onComplete, onStop }: GuidedTourP
     onComplete()
   }
   
-  // Handle tour controls
+  // Pause the tour
   const handlePause = () => {
     setIsPlaying(false)
     if (timeline.current) {
@@ -336,6 +311,7 @@ export default function GuidedTour({ isActive, onComplete, onStop }: GuidedTourP
     }
   }
   
+  // Resume the tour
   const handlePlay = () => {
     setIsPlaying(true)
     if (timeline.current) {
@@ -343,11 +319,13 @@ export default function GuidedTour({ isActive, onComplete, onStop }: GuidedTourP
     }
   }
   
+  // Stop the tour
   const handleStop = () => {
     resetTour()
     onStop()
   }
   
+  // Go to next stop
   const handleNext = () => {
     if (currentStopIndex < tourStops.length - 1) {
       setCurrentStopIndex(prev => prev + 1)
@@ -356,93 +334,100 @@ export default function GuidedTour({ isActive, onComplete, onStop }: GuidedTourP
     }
   }
   
+  // Go to previous stop
   const handlePrevious = () => {
     if (currentStopIndex > 0) {
       setCurrentStopIndex(prev => prev - 1)
     }
   }
   
-  // Only render if tour is active
-  if (!isActive) return null
+  // Use useFrame to update any elements that need to be animated
+  useFrame((state, delta) => {
+    // You can add additional animations here if needed
+  })
   
+  // Render the tour UI
   return (
     <group ref={tourRef}>
-      {/* Narration text */}
-      {showNarration && (
-        <group position={[0, -8, -10]} rotation={[0, 0, 0]}>
-          <mesh position={[0, 0, 0]}>
-            <planeGeometry args={[20, 5]} />
-            <meshBasicMaterial color="#000000" transparent opacity={0.7} />
-          </mesh>
-          <Text
-            position={[0, 0, 0.1]}
-            fontSize={0.5}
-            maxWidth={18}
-            lineHeight={1.2}
-            textAlign="center"
-            color="#ffffff"
+      {/* Tour controls and narration */}
+      <Html position={[0, 0, 0]} center>
+        {showNarration && (
+          <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 w-4/5 max-w-2xl bg-black bg-opacity-80 text-white p-6 rounded-lg shadow-lg z-50">
+            <h2 className="text-xl font-bold mb-2">{tourStops[currentStopIndex]?.title}</h2>
+            <p className="text-lg">{narrationText}</p>
+            <div className="mt-4 text-sm text-gray-300">
+              Stop {currentStopIndex + 1} of {tourStops.length}
+            </div>
+          </div>
+        )}
+        
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 flex items-center space-x-4 bg-black bg-opacity-70 px-6 py-3 rounded-full shadow-lg z-50">
+          {/* Previous button */}
+          <button 
+            onClick={handlePrevious}
+            disabled={currentStopIndex <= 0}
+            className={`p-2 rounded-full ${currentStopIndex <= 0 ? 'text-gray-500' : 'text-white hover:bg-gray-700'}`}
           >
-            {narrationText}
-          </Text>
-        </group>
-      )}
-      
-      {/* Tour controls - positioned at bottom of screen */}
-      <group position={[0, -10, -10]} rotation={[0, 0, 0]}>
-        <mesh position={[0, 0, 0]}>
-          <planeGeometry args={[10, 1.5]} />
-          <meshBasicMaterial color="#000000" transparent opacity={0.7} />
-        </mesh>
-        
-        {/* Previous button */}
-        <group position={[-4, 0, 0.1]} onClick={handlePrevious}>
-          <mesh>
-            <planeGeometry args={[1.5, 1]} />
-            <meshBasicMaterial color="#333333" />
-          </mesh>
-          <Text position={[0, 0, 0.1]} fontSize={0.4} color="#ffffff">
-            Prev
-          </Text>
-        </group>
-        
-        {/* Play/Pause button */}
-        <group position={[-2, 0, 0.1]} onClick={isPlaying ? handlePause : handlePlay}>
-          <mesh>
-            <planeGeometry args={[1.5, 1]} />
-            <meshBasicMaterial color="#333333" />
-          </mesh>
-          <Text position={[0, 0, 0.1]} fontSize={0.4} color="#ffffff">
-            {isPlaying ? "Pause" : "Play"}
-          </Text>
-        </group>
-        
-        {/* Stop button */}
-        <group position={[0, 0, 0.1]} onClick={handleStop}>
-          <mesh>
-            <planeGeometry args={[1.5, 1]} />
-            <meshBasicMaterial color="#333333" />
-          </mesh>
-          <Text position={[0, 0, 0.1]} fontSize={0.4} color="#ffffff">
-            Stop
-          </Text>
-        </group>
-        
-        {/* Next button */}
-        <group position={[2, 0, 0.1]} onClick={handleNext}>
-          <mesh>
-            <planeGeometry args={[1.5, 1]} />
-            <meshBasicMaterial color="#333333" />
-          </mesh>
-          <Text position={[0, 0, 0.1]} fontSize={0.4} color="#ffffff">
-            Next
-          </Text>
-        </group>
-        
-        {/* Progress indicator */}
-        <Text position={[4, 0, 0.1]} fontSize={0.4} color="#ffffff">
-          {`${currentStopIndex + 1}/${tourStops.length}`}
-        </Text>
-      </group>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          
+          {/* Play/Pause button */}
+          {isPlaying ? (
+            <button 
+              onClick={handlePause}
+              className="p-2 rounded-full text-white hover:bg-gray-700"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
+          ) : (
+            <button 
+              onClick={handlePlay}
+              className="p-2 rounded-full text-white hover:bg-gray-700"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
+          )}
+          
+          {/* Stop button */}
+          <button 
+            onClick={handleStop}
+            className="p-2 rounded-full text-white hover:bg-gray-700"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+            </svg>
+          </button>
+          
+          {/* Next/Exit button */}
+          {currentStopIndex < tourStops.length - 1 ? (
+            <button 
+              onClick={handleNext}
+              className="p-2 rounded-full text-white hover:bg-gray-700"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          ) : (
+            <button 
+              onClick={finishTour}
+              className="p-2 rounded-full text-white hover:bg-gray-700"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+      </Html>
     </group>
   )
 } 
