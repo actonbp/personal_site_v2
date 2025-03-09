@@ -113,7 +113,7 @@ export default function Home() {
       <Suspense fallback={<div className="w-full h-full flex items-center justify-center text-white">Loading...</div>}>
         <Canvas
           ref={canvasRef}
-          camera={{ position: [0, 0, 15], fov: 75 }}
+          camera={{ position: [0, 0, 30], fov: 60 }}
           gl={{ 
             antialias: true,
             alpha: true,
@@ -165,8 +165,8 @@ export default function Home() {
             enableRotate={true}
             autoRotate={!isInteracting && !focusedTopic}
             autoRotateSpeed={0.4}
-            minDistance={5}
-            maxDistance={50}
+            minDistance={15}
+            maxDistance={60}
             dampingFactor={0.15}
             rotateSpeed={0.8}
             zoomSpeed={0.8}
