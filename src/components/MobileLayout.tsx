@@ -3,18 +3,27 @@
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 
-// Dynamically import mobile components
-const MobileViewport = dynamic(() => import('./mobile/MobileViewport'), { ssr: false })
-const MobileOrbitControls = dynamic(() => import('./mobile/MobileOrbitControls'), { ssr: false })
-const MobileSupport = dynamic(() => import('./mobile/MobileSupport'), { ssr: false })
-const MobileTourButton = dynamic(() => import('./mobile/MobileTourButton'), { ssr: false })
+// Dynamically import mobile components from centralized exports
+const { 
+  MobileViewport,
+  MobileOrbitControls,
+  MobileSupport,
+  MobileTourButton
+} = {
+  MobileViewport: dynamic(() => import('./mobile').then(mod => ({ default: mod.MobileViewport })), { ssr: false }),
+  MobileOrbitControls: dynamic(() => import('./mobile').then(mod => ({ default: mod.MobileOrbitControls })), { ssr: false }),
+  MobileSupport: dynamic(() => import('./mobile').then(mod => ({ default: mod.MobileSupport })), { ssr: false }),
+  MobileTourButton: dynamic(() => import('./mobile').then(mod => ({ default: mod.MobileTourButton })), { ssr: false })
+}
+
+import { isMobileDevice as checkMobileDevice } from '@/lib/utils'
 
 export default function MobileLayout({ children }: { children: React.ReactNode }) {
   const [isMobileDevice, setIsMobileDevice] = useState(false)
   
   useEffect(() => {
     // Add a class to the body for mobile-specific CSS
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+    const isMobile = checkMobileDevice()
     
     if (isMobile) {
       setIsMobileDevice(true)

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
+import { isMobileDevice } from '@/lib/utils'
 
 // Dynamically import components that require client-side rendering
 const MobileViewport = dynamic(() => import('./MobileViewport'), { ssr: false })
@@ -12,10 +13,9 @@ export default function MobileSupport() {
   const [isMobile, setIsMobile] = useState(false)
   
   useEffect(() => {
-    // Detect if we're on a mobile device
+    // Detect if we're on a mobile device using shared utility
     const checkMobile = () => {
-      const isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-      setIsMobile(isMobileDevice)
+      setIsMobile(isMobileDevice())
     }
     
     // Check on mount

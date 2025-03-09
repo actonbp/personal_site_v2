@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { useThree } from '@react-three/fiber'
 import * as THREE from 'three'
+import { isMobileDevice } from '@/lib/utils'
 
 /**
  * MobileOptimizer component enhances the experience on mobile devices
@@ -12,8 +13,8 @@ export default function MobileOptimizer() {
   const { camera, gl } = useThree()
   
   useEffect(() => {
-    // Detect if we're on a mobile device
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+    // Detect if we're on a mobile device using shared utility
+    const isMobile = isMobileDevice()
     
     if (isMobile) {
       // Adjust renderer pixel ratio for better performance on mobile

@@ -1,6 +1,18 @@
 # Mobile Optimization Components
 
-This directory contains components designed to optimize your Three.js/React Three Fiber application for mobile devices.
+This directory contains components designed to optimize your Three.js/React Three Fiber application for mobile devices. All mobile components are centralized here for better organization and maintainability.
+
+## Usage
+
+Import mobile components from the central export:
+
+```jsx
+import { 
+  MobileOptimizer, 
+  MobileSupport, 
+  MobileViewport 
+} from '@/components/mobile'
+```
 
 ## Components
 
@@ -26,13 +38,29 @@ export default function MyScene() {
 
 ### Individual Components
 
-If you prefer to use the individual components:
+All components are exported from the central index.ts file. Available components:
 
 - **MobileThreeSupport**: Optimizes Three.js renderer and scene for mobile performance
 - **MobileTouchControls**: Adds custom touch controls for mobile devices
 - **MobileOrbitControls**: Enhanced OrbitControls for mobile touch interactions
 - **MobileViewport**: Sets up proper viewport meta tags for mobile
 - **MobilePaper**: Enhances paper interactions for mobile devices
+- **MobileSupport**: Orchestrates multiple mobile optimizations in one component
+- **MobileOptimizer**: Optimizes Three.js rendering for mobile performance
+- **MobileTourButton**: Provides a tour button optimized for mobile
+
+## Shared Utilities
+
+Mobile detection is now centralized in the utils.ts file:
+
+```typescript
+import { isMobileDevice } from '@/lib/utils'
+
+// Check if on mobile
+if (isMobileDevice()) {
+  // Mobile-specific code
+}
+```
 
 ## Setup Instructions
 
