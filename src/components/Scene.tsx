@@ -713,20 +713,18 @@ export default function Scene() {
                 </Text>
               )}
               
-              {/* Paper count with improved styling */}
-              {isActive && (
-                <Text
-                  position={[0, -1.0, 0]}
-                  fontSize={0.28}
-                  color="white"
-                  anchorX="center"
-                  anchorY="middle"
-                  outlineWidth={0.02}
-                  outlineColor="#000000"
-                >
-                  {topic.papers.length} papers
-                </Text>
-              )}
+              {/* Always show paper count below each topic */}
+              <Text
+                position={[0, -1.0, 0]}
+                fontSize={0.28}
+                color="white"
+                anchorX="center"
+                anchorY="middle"
+                outlineWidth={0.02}
+                outlineColor="#000000"
+              >
+                {topic.papers.length} papers
+              </Text>
             </group>
           )
         })}
