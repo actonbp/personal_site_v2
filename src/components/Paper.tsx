@@ -12,19 +12,15 @@ const MobilePaper = dynamic(() => import("./mobile/MobilePaper"), { ssr: false }
 
 type PaperProps = {
   title: string
+  abstract: string
   position: [number, number, number]
   isVisible: boolean
   topicPosition: [number, number, number]
   onPaperClick?: () => void
 }
 
-// Example abstract (replace with real content later)
-const SAMPLE_ABSTRACT = `This paper explores the intersection of artificial intelligence and human cognition, 
-focusing on emergent behaviors in multi-agent systems. Through extensive experimentation and theoretical analysis, 
-we demonstrate novel approaches to agent-based learning and collective intelligence. Our findings suggest significant 
-implications for the future of human-AI collaboration and distributed systems architecture.`
 
-export default function Paper({ title, position, isVisible, topicPosition, onPaperClick }: PaperProps) {
+export default function Paper({ title, abstract, position, isVisible, topicPosition, onPaperClick }: PaperProps) {
   const lineRef = useRef<THREE.Line>(null!)
   const particlesRef = useRef<THREE.Points>(null!)
   const groupRef = useRef<THREE.Group>(null!)
@@ -110,7 +106,7 @@ export default function Paper({ title, position, isVisible, topicPosition, onPap
       />
       <PaperDetail
         title={title}
-        abstract={SAMPLE_ABSTRACT}
+        abstract={abstract}
         isActive={showDetail}
         paperPosition={position}
         onClose={() => setShowDetail(false)}

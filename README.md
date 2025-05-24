@@ -7,6 +7,7 @@ Interactive 3D visualization of research topics and papers, featuring a Matrix-s
 - Matrix-style falling characters that transform into network visualizations
 - Interactive 3D topic exploration
 - Connected paper visualization for each research topic
+- Click a topic to reveal a list of sample papers with abstracts
 - Dynamic transitions and animations
 - Responsive design
 
