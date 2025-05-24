@@ -72,7 +72,7 @@ export const papers: Paper[] = [
   {
     id: "p1",
     title: "Emergent Abilities of Large Language Models",
-    abstract: "This paper explores the emergent abilities of large language models as they scale in size and complexity.",
+    abstract: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
     author: "Bryan Acton",
     embedding: [-7, 3, 1],
     topics: ["t1", "t5"],
@@ -82,7 +82,7 @@ export const papers: Paper[] = [
   {
     id: "p2",
     title: "Vector Representations in Deep Learning",
-    abstract: "An exploration of how vector representations enable deep learning models to capture semantic meaning.",
+    abstract: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
     author: "Bryan Acton",
     embedding: [7, -1, 3],
     topics: ["t2"],
@@ -92,7 +92,7 @@ export const papers: Paper[] = [
   {
     id: "p3",
     title: "Multi-Agent Collaboration Systems",
-    abstract: "This research presents a framework for enabling multiple AI agents to collaborate effectively on complex tasks.",
+    abstract: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
     author: "Bryan Acton",
     embedding: [-6, 2, -3],
     topics: ["t1", "t4"],
@@ -102,7 +102,7 @@ export const papers: Paper[] = [
   {
     id: "p4",
     title: "Identity Formation in Digital Spaces",
-    abstract: "An analysis of how individuals form and express identity in digital and virtual environments.",
+    abstract: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
     author: "Bryan Acton",
     embedding: [-2, -3, -3],
     topics: ["t3", "t6"],
@@ -112,7 +112,7 @@ export const papers: Paper[] = [
   {
     id: "p5",
     title: "Semantic Embeddings for Knowledge Graphs",
-    abstract: "This paper introduces a novel approach to creating semantic embeddings for complex knowledge graphs.",
+    abstract: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
     author: "Bryan Acton",
     embedding: [6, -3, 1],
     topics: ["t2"],
@@ -122,7 +122,7 @@ export const papers: Paper[] = [
   {
     id: "p6",
     title: "Leadership Dynamics in Virtual Teams",
-    abstract: "An examination of how leadership emerges and functions in distributed virtual team environments.",
+    abstract: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
     author: "Bryan Acton",
     embedding: [0, -2, -3],
     topics: ["t3", "t4"],
@@ -132,7 +132,7 @@ export const papers: Paper[] = [
   {
     id: "p7",
     title: "Memory Augmentation in Large Language Models",
-    abstract: "This research explores techniques for enhancing the memory capabilities of large language models.",
+    abstract: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
     author: "Bryan Acton",
     embedding: [-7, 1, 3],
     topics: ["t1", "t5"],
@@ -142,7 +142,7 @@ export const papers: Paper[] = [
   {
     id: "p8",
     title: "Cross-Modal Embeddings for AI Systems",
-    abstract: "A novel approach to creating embeddings that work across different modalities like text, images, and audio.",
+    abstract: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
     author: "Bryan Acton",
     embedding: [5, -1, 4],
     topics: ["t2"],
@@ -152,7 +152,7 @@ export const papers: Paper[] = [
   {
     id: "p9",
     title: "Digital Identity in Collaborative Environments",
-    abstract: "This paper examines how digital identity influences collaboration in virtual team settings.",
+    abstract: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
     author: "Bryan Acton",
     embedding: [2, 0, -4],
     topics: ["t4", "t6"],
@@ -162,7 +162,7 @@ export const papers: Paper[] = [
   {
     id: "p10",
     title: "Episodic Memory in Artificial Intelligence",
-    abstract: "An exploration of implementing episodic memory capabilities in artificial intelligence systems.",
+    abstract: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
     author: "Bryan Acton",
     embedding: [-5, -1, 5],
     topics: ["t5"],
