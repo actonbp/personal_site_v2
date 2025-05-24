@@ -25,6 +25,8 @@ npm install
 
 # Run development server
 npm run dev
+# The server will start on port 3000 by default and automatically use the next
+# available port if 3000 is already in use.
 
 # Build for production
 npm run build
