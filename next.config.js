@@ -6,6 +6,11 @@ const nextConfig = {
     config.externals = [...(config.externals || []), { canvas: 'canvas' }];
     return config;
   },
+  // Disable font optimization for environments without internet access
+  optimizeFonts: false,
+  experimental: {
+    fontLoaders: []
+  }
 };
 
 module.exports = nextConfig;
